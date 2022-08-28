@@ -48,19 +48,21 @@ int main(int argc, char *argv[])
         std::exit(1);
     }
 
-    if (ftruncate(shm_fd, sizeof(OperationData)) == -1)
+    if (ftruncate(shm_fd, operation_data_size) == -1)
     {
         std::cout << "Cannot open truncate SHM: " << strerror(errno) << "\n";
         std::exit(1);
     }
 
-    mapped_data = static_cast<OperationData *>(mmap(nullptr, sizeof(OperationData), PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0));
+    void *mmap_ret_val = mmap(nullptr, operation_data_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
 
-    if (mapped_data == MAP_FAILED)
+    if (mmap_ret_val == MAP_FAILED)
     {
         std::cout << "Cannot map to SHM: " << strerror(errno) << "\n";
         std::exit(1);
     }
+
+    mapped_data = static_cast<OperationData *>(mmap_ret_val);
 
     /*
 
@@ -182,7 +184,7 @@ void signal_handler(int signal_number)
     {
         while (is_handling_request)
             sleep(1);
-        if (munmap(mapped_data, sizeof(OperationData)) == -1)
+        if (munmap(mapped_data, operation_data_size) == -1)
         {
             std::cout << "Cannot unmap SHM: " << strerror(errno) << "\n";
         }

@@ -41,17 +41,20 @@ int main(int argc, char *argv[])
     id = argv[1];
     key = argv[3];
 
-    if (operation_type == OperationType::Insert && argc < 5)
+    if (operation_type == OperationType::Insert)
     {
-        std::cout << "Need a valid value for insert operation\n";
-        std::exit(1);
-    }
-    else
-    {
-        value = argv[4];
+        if (argc < 5)
+        {
+            std::cout << "Need a valid value for insert operation\n";
+            std::exit(1);
+        }
+        else
+        {
+            value = argv[4];
+        }
     }
 
-    std::cout << "Startin the Client with key: " << key << " value: " << value << " id: " << id << " operation type: " << std::to_string(operation_type) << "\n";
+    std::cout << "Starting the Client with key: " << key << " value: " << value << " id: " << id << " operation type: " << std::to_string(operation_type) << "\n";
 
     int shm_fd = shm_open(shared_memory_name, O_RDWR, 0777);
 
@@ -61,15 +64,15 @@ int main(int argc, char *argv[])
         std::exit(1);
     }
 
-    ftruncate(shm_fd, sizeof(OperationData));
+    ftruncate(shm_fd, operation_data_size);
 
-    if (ftruncate(shm_fd, sizeof(OperationData)) == -1)
+    if (ftruncate(shm_fd, operation_data_size) == -1)
     {
         std::cout << "Cannot open truncate SHM: " << strerror(errno) << "\n";
         std::exit(1);
     }
 
-    void *mmap_ret_val = mmap(NULL, sizeof(OperationData), PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+    void *mmap_ret_val = mmap(NULL, operation_data_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
 
     if (mmap_ret_val == MAP_FAILED)
     {
@@ -153,7 +156,7 @@ int main(int argc, char *argv[])
         std::cout << "Operation Failed: " << message << "\n";
     }
 
-    memset(mapped_data, 0, sizeof(OperationData)); // Reset for the next client.
+    memset(mapped_data, 0, operation_data_size); // Reset for the next client.
 
     if (sem_post(client_write_semaphore) == -1)
     {
@@ -162,7 +165,7 @@ int main(int argc, char *argv[])
 
     // Clean up.
 
-    if (munmap(mapped_data, sizeof(OperationData)) == -1)
+    if (munmap(mapped_data, operation_data_size) == -1)
     {
         std::cout << "Cannot unmap SHM: " << strerror(errno) << "\n";
     }

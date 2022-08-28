@@ -49,6 +49,8 @@ struct OperationData
     friend std::ostream &operator<<(std::ostream &os, const OperationData &data);
 };
 
+constexpr size_t operation_data_size = sizeof(OperationData);
+
 std::ostream &operator<<(std::ostream &os, const OperationData &data)
 {
     std::string string_to_print = "[OperationData]: id: " + std::string(data.id) + " key: " + std::string(data.key) + " value: " + std::string(data.value) + " OperationType: " + std::to_string(data.type) + " message: " + std::string(data.message) + " status: " + std::to_string(data.status);

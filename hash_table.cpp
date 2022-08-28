@@ -4,10 +4,12 @@
 
 containers::HashTable::HashTable(size_t initial_size)
 {
+    std::cout << "\t\t[HashTable::HashTable]Creating a hash table with size: " << initial_size << "\n";
     table_size = initial_size;
     buckets = new LinkedListItem *[initial_size];
     for (size_t idx = 0; idx < table_size; idx++)
         buckets[idx] = nullptr;
+    std::cout << "\t\t[HashTable::HashTable]Created a hash table with size: " << initial_size << "\n";
 }
 
 containers::HashTable::~HashTable()
